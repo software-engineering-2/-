@@ -1,10 +1,12 @@
 import pygame
 import random
 
+
 SCREEN_RECT = pygame.Rect(0,0,340,573)
 CREATE_ENEMY_EVENT = pygame.USEREVENT
 #hero子弹
 HERO_FIRE_EVENT = pygame.USEREVENT + 1
+ENEMY_FIRE_EVENT = pygame.USEREVENT + 2
 
 #爆炸销毁图片
 bg1 = pygame.image.load('./images/z1.png')
@@ -27,6 +29,9 @@ enemy1_down_surface.append(bg5)
 enemy1_down_surface.append(bg6)
 enemy1_down_surface.append(bg7)
 
+
+
+
 class GameSprite(pygame.sprite.Sprite):
     "精灵"
     def __init__(self,image_name,speed=1):
@@ -42,35 +47,36 @@ class GameSprite(pygame.sprite.Sprite):
         self.rect.y += self.speed
         pass
 
-class Background(GameSprite):
-
+class BackGround(GameSprite):
     def __init__(self,is_alt=False):
         super().__init__('./images/bg2.png')
-
-
+        if is_alt:
+            self.rect.y = -self.rect.height
     def update(self):
-        #调用父类
+    # 1. 调用父类的方法实现
         super().update()
-        #
-        if self.rect.y >= SCREEN_RECT.height:
-            self.rect.y = - self.rect.height
-        pass
+    # 2. 判断是否移出屏幕，如果移出屏幕，将图像设置到屏幕的上方
+        if  self.rect.y >= SCREEN_RECT.height:
+            self.rect.y =- self.rect.height
 
 
 class Enemy(GameSprite):
+
 
     def __init__(self):
         # 调用父类，制定敌机
         super().__init__('./images/enemy.png')
         #随机速度
-        self.speed = random.randint(1,3)
+        self.speed = random.randint(1,2)
         #随机位置
+        self.down_index = 0
         self.rect.bottom = 0
         max_x = SCREEN_RECT.width - self.rect.width
         self.rect.x = random.randint(0,max_x)
         #创建子弹精灵族
         self.bullet1 = pygame.sprite.Group()
-        pass
+
+
 
     def update(self):
         super().update()
@@ -78,7 +84,9 @@ class Enemy(GameSprite):
             self.kill()
         pass
 
+
     def fire(self):
+
         print("发射子弹22")
 
 
@@ -86,7 +94,7 @@ class Enemy(GameSprite):
         bullet = Bullet1()
 
         # 2.设置精灵位置
-        bullet.rect.bottom = self.rect.y
+        bullet.rect.bottom = self.rect.y + 100
         bullet.rect.centerx = self.rect.centerx
 
         # 3.精灵添加到精灵组
@@ -127,21 +135,22 @@ class Hero(GameSprite):
 
         for i in (0,1,2):
 
-        #1.创建子弹
+            #1.创建子弹
             bullet = Bullet()
 
-        #2.设置精灵位置
-            bullet.rect.bottom = self.rect.y - i * 20
+            #2.设置精灵位置
+            bullet.rect.bottom = self.rect.y -  20*i
             bullet.rect.centerx = self.rect.centerx
 
-        #3.精灵添加到精灵组
+            #3.精灵添加到精灵组
             self.bullet.add(bullet)
 
 
 class Bullet(GameSprite):
     """docstring for ClassName"""
     def __init__(self):
-        super().__init__('./images/bullet.png',-20)
+        super().__init__('./images/bullet.png',-10)
+        self.down_index = 0
         pass
 
     def update(self):
@@ -156,12 +165,13 @@ class Bullet(GameSprite):
 class Bullet1(GameSprite):
     """docstring for ClassName"""
     def __init__(self):
-        super().__init__('./images/bullet1.png',-10)
+        super().__init__('./images/bullet3.png',-5)
+        self.down_index = 0
         pass
 
     def update(self):
         self.rect.y -= self.speed
-        if self.rect.height >SCREEN_RECT.height:
+        if self.rect.height > SCREEN_RECT.height:
             self.kill()
 
     def __del__(self):
